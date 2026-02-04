@@ -1,4 +1,5 @@
 import Image from "next/image";
+import ScrollReveal, { StaggerContainer, StaggerItem } from "./ScrollReveal";
 
 const news = [
   {
@@ -31,43 +32,53 @@ export default function NoticiasEventos() {
   return (
     <section
       id="noticias"
-      className="flex flex-col gap-12 bg-[var(--white)] px-[120px] py-[80px] w-full"
+      className="flex flex-col gap-10 md:gap-12 bg-[var(--white)] section-px py-[60px] md:py-[80px] w-full"
     >
-      <span className="text-[11px] font-semibold tracking-[2px] text-[var(--burgundy)]">
-        NOTICIAS Y EVENTOS
-      </span>
-      <h2 className="font-heading text-[40px] font-semibold leading-[1.2] text-[var(--text-primary)]">
-        Actividad reciente
-      </h2>
+      <ScrollReveal>
+        <span className="text-[11px] font-semibold tracking-[2px] text-[var(--burgundy)]">
+          NOTICIAS Y EVENTOS
+        </span>
+      </ScrollReveal>
 
-      <div className="flex gap-6 w-full">
+      <ScrollReveal delay={0.1}>
+        <h2 className="font-heading text-[32px] md:text-[40px] font-semibold leading-[1.2] text-[var(--text-primary)]">
+          Actividad reciente
+        </h2>
+      </ScrollReveal>
+
+      <StaggerContainer
+        stagger={0.15}
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6 w-full"
+      >
         {news.map((item) => (
-          <div
-            key={item.title}
-            className="flex flex-1 flex-col overflow-hidden rounded-[8px] border border-[var(--border)] bg-[var(--cream-light)]"
-          >
-            <div className="relative h-[200px] w-full">
-              <Image
-                src={item.image}
-                alt={item.title}
-                fill
-                className="object-cover"
-              />
+          <StaggerItem key={item.title}>
+            <div className="group flex flex-col overflow-hidden rounded-[8px] border border-[var(--border)] bg-[var(--cream-light)] h-full hover:-translate-y-1 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)] hover:border-[var(--burgundy)]/20 transition-all duration-300 cursor-pointer">
+              {/* Image with zoom on hover */}
+              <div className="relative h-[180px] md:h-[200px] w-full overflow-hidden">
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                {/* Subtle overlay on hover */}
+                <div className="absolute inset-0 bg-[var(--burgundy)]/0 group-hover:bg-[var(--burgundy)]/[0.06] transition-colors duration-500" />
+              </div>
+              <div className="flex flex-col gap-3 p-5 md:p-6">
+                <span className="text-[11px] font-semibold tracking-[1px] text-[var(--burgundy)]">
+                  {item.date}
+                </span>
+                <h3 className="font-heading text-[20px] md:text-[22px] font-semibold leading-[1.3] text-[var(--text-primary)]">
+                  {item.title}
+                </h3>
+                <p className="text-[14px] leading-[1.6] text-[var(--text-secondary)]">
+                  {item.description}
+                </p>
+              </div>
             </div>
-            <div className="flex flex-col gap-3 p-6">
-              <span className="text-[11px] font-semibold tracking-[1px] text-[var(--burgundy)]">
-                {item.date}
-              </span>
-              <h3 className="font-heading text-[22px] font-semibold leading-[1.3] text-[var(--text-primary)]">
-                {item.title}
-              </h3>
-              <p className="text-[14px] leading-[1.6] text-[var(--text-secondary)]">
-                {item.description}
-              </p>
-            </div>
-          </div>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
     </section>
   );
 }
