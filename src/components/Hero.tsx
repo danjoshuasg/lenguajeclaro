@@ -22,157 +22,278 @@ const fadeDown = (delay: number) => ({
   },
 });
 
-/* Leaf shapes with veins for realism */
-interface LeafShape {
-  viewBox: string;
-  body: string;
-  vein: string; // center vein path
+/* Page content — structured as title + paragraph blocks for realism */
+interface TextLine {
+  top: number;
+  width: number;
+  bold?: boolean;
 }
 
-const leafShapes: LeafShape[] = [
+interface PageData {
+  tint: string;
+  backTint: string;
+  front: TextLine[];
+  back: TextLine[];
+}
+
+const pages: PageData[] = [
   {
-    // Maple-like
-    viewBox: "0 0 24 20",
-    body: "M12 1C12 1 9 5 6 7C3 9 0 9 0 11C0 13 3 16 6 16C8 16 10 15 12 12.5C14 15 16 16 18 16C21 16 24 13 24 11C24 9 21 9 18 7C15 5 12 1 12 1Z",
-    vein: "M12 1L12 16",
+    tint: "var(--cream-light)",
+    backTint: "var(--cream)",
+    front: [
+      { top: 12, width: 35, bold: true },
+      { top: 22, width: 62 }, { top: 29, width: 71 }, { top: 36, width: 48 },
+      { top: 50, width: 55 }, { top: 57, width: 67 }, { top: 64, width: 42 },
+      { top: 78, width: 58 }, { top: 85, width: 50 },
+    ],
+    back: [
+      { top: 12, width: 40, bold: true },
+      { top: 22, width: 55 }, { top: 29, width: 68 }, { top: 36, width: 45 },
+      { top: 50, width: 72 }, { top: 57, width: 50 }, { top: 64, width: 63 },
+      { top: 78, width: 48 }, { top: 85, width: 60 },
+    ],
   },
   {
-    // Rounded oak
-    viewBox: "0 0 20 22",
-    body: "M10 0C10 0 4 4 2 8C0 12 1.5 16 5 18.5C7.5 20 10 21 10 21C10 21 12.5 20 15 18.5C18.5 16 20 12 18 8C16 4 10 0 10 0Z",
-    vein: "M10 0L10 21",
+    tint: "#FAF8F3",
+    backTint: "#F6F1EA",
+    front: [
+      { top: 12, width: 42, bold: true },
+      { top: 22, width: 70 }, { top: 29, width: 45 }, { top: 36, width: 63 },
+      { top: 50, width: 52 }, { top: 57, width: 68 }, { top: 64, width: 55 },
+      { top: 78, width: 60 }, { top: 85, width: 38 },
+    ],
+    back: [
+      { top: 12, width: 38, bold: true },
+      { top: 22, width: 60 }, { top: 29, width: 42 }, { top: 36, width: 73 },
+      { top: 50, width: 48 }, { top: 57, width: 65 }, { top: 64, width: 55 },
+      { top: 78, width: 70 }, { top: 85, width: 44 },
+    ],
   },
   {
-    // Elongated willow-like
-    viewBox: "0 0 12 28",
-    body: "M6 0C6 0 1 7 0.5 14C0 21 3 26 6 28C9 26 12 21 11.5 14C11 7 6 0 6 0Z",
-    vein: "M6 0L6 28",
+    tint: "var(--cream-light)",
+    backTint: "var(--cream)",
+    front: [
+      { top: 12, width: 30, bold: true },
+      { top: 22, width: 68 }, { top: 29, width: 42 }, { top: 36, width: 60 },
+      { top: 50, width: 73 }, { top: 57, width: 48 }, { top: 64, width: 55 },
+      { top: 78, width: 65 }, { top: 85, width: 40 },
+    ],
+    back: [
+      { top: 12, width: 45, bold: true },
+      { top: 22, width: 50 }, { top: 29, width: 65 }, { top: 36, width: 55 },
+      { top: 50, width: 42 }, { top: 57, width: 70 }, { top: 64, width: 60 },
+      { top: 78, width: 52 }, { top: 85, width: 68 },
+    ],
   },
   {
-    // Asymmetric birch-like
-    viewBox: "0 0 16 24",
-    body: "M7 0C7 0 2 5 1 10C0 15 2 20 5 22.5C7 24 8 24 8 24C8 24 10 23 12 21C15 18 16 13 15 9C14 5 9 1 7 0Z",
-    vein: "M7 0L8 24",
+    tint: "#FAF8F3",
+    backTint: "#F6F1EA",
+    front: [
+      { top: 12, width: 48, bold: true },
+      { top: 22, width: 50 }, { top: 29, width: 65 }, { top: 36, width: 58 },
+      { top: 50, width: 44 }, { top: 57, width: 72 }, { top: 64, width: 60 },
+      { top: 78, width: 55 }, { top: 85, width: 42 },
+    ],
+    back: [
+      { top: 12, width: 36, bold: true },
+      { top: 22, width: 68 }, { top: 29, width: 52 }, { top: 36, width: 45 },
+      { top: 50, width: 70 }, { top: 57, width: 55 }, { top: 64, width: 48 },
+      { top: 78, width: 62 }, { top: 85, width: 56 },
+    ],
   },
 ];
 
-interface Leaf {
-  id: number;
-  shape: number;
-  x: string;
-  y: string;
-  size: number;
-  color: string;
-  opacity: number;
-  animation: string;
-  duration: string;
-  delay: string;
-  rotate: number;
-}
-
-/* Layer tag controls visibility on mobile for performance */
-type Layer = "fg" | "mid" | "bg";
-
-interface LeafDef extends Leaf {
-  layer: Layer;
-}
-
-const leaves: LeafDef[] = [
-  // === Foreground (larger, more opaque) — always visible ===
-  { id: 1,  shape: 0, x: "4%",   y: "6%",   size: 40, color: "var(--burgundy)",       opacity: 0.38, animation: "leaf-drift-1", duration: "9s",   delay: "0s",   rotate: -15, layer: "fg" },
-  { id: 2,  shape: 1, x: "20%",  y: "2%",   size: 36, color: "var(--burgundy-light)", opacity: 0.32, animation: "leaf-drift-2", duration: "11s",  delay: "2s",   rotate: 20,  layer: "fg" },
-  { id: 3,  shape: 3, x: "10%",  y: "42%",  size: 34, color: "var(--burgundy-dark)",  opacity: 0.30, animation: "leaf-drift-3", duration: "10s",  delay: "0.8s", rotate: 50,  layer: "fg" },
-  { id: 4,  shape: 0, x: "28%",  y: "22%",  size: 38, color: "var(--burgundy)",       opacity: 0.34, animation: "leaf-gust",    duration: "7s",   delay: "4s",   rotate: -40, layer: "fg" },
-
-  // === Midground — hidden on small mobile (< 640px) ===
-  { id: 5,  shape: 2, x: "14%",  y: "14%",  size: 28, color: "var(--burgundy-light)", opacity: 0.24, animation: "leaf-drift-2", duration: "13s",  delay: "1.2s", rotate: 65,  layer: "mid" },
-  { id: 6,  shape: 1, x: "32%",  y: "48%",  size: 26, color: "var(--burgundy)",       opacity: 0.22, animation: "leaf-drift-3", duration: "10.5s",delay: "3.5s", rotate: -8,  layer: "mid" },
-  { id: 7,  shape: 3, x: "1%",   y: "58%",  size: 30, color: "var(--burgundy-dark)",  opacity: 0.26, animation: "leaf-drift-1", duration: "11.5s",delay: "5.2s", rotate: 30,  layer: "mid" },
-  { id: 8,  shape: 2, x: "24%",  y: "55%",  size: 24, color: "var(--burgundy-light)", opacity: 0.20, animation: "leaf-gust",    duration: "6.5s", delay: "7s",   rotate: -50, layer: "mid" },
-  { id: 9,  shape: 0, x: "38%",  y: "35%",  size: 25, color: "var(--burgundy)",       opacity: 0.18, animation: "leaf-drift-2", duration: "14s",  delay: "2.8s", rotate: 75,  layer: "mid" },
-
-  // === Background (small, faded) — desktop only ===
-  { id: 10, shape: 1, x: "16%",  y: "32%",  size: 18, color: "var(--burgundy)",       opacity: 0.14, animation: "leaf-drift-3", duration: "16s",  delay: "0.4s", rotate: 80,  layer: "bg" },
-  { id: 11, shape: 3, x: "36%",  y: "8%",   size: 20, color: "var(--burgundy-dark)",  opacity: 0.12, animation: "leaf-drift-1", duration: "17s",  delay: "6s",   rotate: -60, layer: "bg" },
-  { id: 12, shape: 2, x: "30%",  y: "68%",  size: 16, color: "var(--burgundy-light)", opacity: 0.10, animation: "leaf-drift-2", duration: "13s",  delay: "3.2s", rotate: 35,  layer: "bg" },
-  { id: 13, shape: 0, x: "0%",   y: "28%",  size: 22, color: "var(--burgundy)",       opacity: 0.15, animation: "leaf-drift-1", duration: "14s",  delay: "8s",   rotate: -70, layer: "bg" },
-  { id: 14, shape: 1, x: "42%",  y: "60%",  size: 15, color: "var(--burgundy-dark)",  opacity: 0.09, animation: "leaf-gust",    duration: "8s",   delay: "5s",   rotate: 45,  layer: "bg" },
-];
-
-const layerClasses: Record<Layer, string> = {
-  fg:  "",                            // always visible
-  mid: "hidden sm:block",             // >= 640px
-  bg:  "hidden md:block",             // >= 768px
-};
-
-function LeafSVG({
-  shape,
-  size,
-  color,
-  opacity,
-  style,
-  className = "",
-  isForeground = false,
+/* Renders a set of text lines on a page face */
+function PageLines({
+  lines,
+  align,
 }: {
-  shape: number;
-  size: number;
-  color: string;
-  opacity: number;
-  style: React.CSSProperties;
-  className?: string;
-  isForeground?: boolean;
+  lines: TextLine[];
+  align: "left" | "right";
 }) {
-  const s = leafShapes[shape];
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={s.viewBox}
-      style={{
-        ...style,
-        ...(isForeground
-          ? { filter: "drop-shadow(0 2px 4px rgba(114,47,55,0.18))" }
-          : {}),
-      }}
-      className={`absolute pointer-events-none ${className}`.trim()}
+    <>
+      {lines.map((line) => (
+        <div
+          key={line.top}
+          className="absolute rounded-full"
+          style={{
+            [align]: "10%",
+            top: `${line.top}%`,
+            width: `${line.width}%`,
+            height: line.bold ? "2.5px" : "1.5px",
+            backgroundColor: "var(--burgundy)",
+            opacity: line.bold ? 0.16 : 0.1,
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+function OpenBook() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1, delay: 0.8, ease }}
+      className="absolute bottom-6 right-[4%] sm:bottom-8 sm:right-[6%] md:bottom-10 md:right-[8%] lg:right-[10%] pointer-events-none hidden sm:block"
+      style={{ perspective: "1000px" }}
       aria-hidden="true"
     >
-      <path d={s.body} fill={color} opacity={opacity} />
-      <path
-        d={s.vein}
-        stroke={color}
-        strokeWidth="0.6"
-        fill="none"
-        opacity={opacity * 0.6}
-      />
-    </svg>
+      <div
+        className="relative w-[220px] h-[148px] sm:w-[260px] sm:h-[172px] md:w-[340px] md:h-[220px] lg:w-[380px] lg:h-[248px]"
+        style={{ transform: "rotateX(25deg)", transformStyle: "preserve-3d" }}
+      >
+        {/* Shadow beneath the book */}
+        <div className="absolute -bottom-4 left-[3%] w-[94%] h-6 rounded-[50%] bg-black/[0.1] blur-[10px]" />
+
+        {/* Left cover + static page */}
+        <div className="absolute left-0 top-0 w-[calc(50%-3px)] md:w-[calc(50%-4px)] h-full rounded-l-[4px] overflow-hidden bg-[var(--burgundy)] shadow-[inset_-2px_0_6px_rgba(0,0,0,0.2)]">
+          <div
+            className="absolute inset-[3px] md:inset-[4px] rounded-l-[3px]"
+            style={{ backgroundColor: pages[0].backTint }}
+          >
+            <PageLines lines={pages[0].back} align="left" />
+            {/* Gutter shadow near spine */}
+            <div
+              className="absolute right-0 top-0 h-full w-[15%]"
+              style={{
+                background:
+                  "linear-gradient(to left, rgba(90,37,44,0.1), transparent)",
+              }}
+            />
+          </div>
+          {/* Page edge thickness — left side */}
+          <div
+            className="absolute left-0 top-[4px] md:top-[5px] w-[3px] md:w-[4px] rounded-l-[2px]"
+            style={{
+              height: "calc(100% - 8px)",
+              background:
+                "repeating-linear-gradient(to bottom, var(--cream) 0px, var(--cream) 2px, var(--cream-dark) 2px, var(--cream-dark) 3px)",
+            }}
+          />
+        </div>
+
+        {/* Spine with gradient */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2 top-0 w-[6px] md:w-[8px] h-full z-30 rounded-[1px] shadow-[0_0_8px_rgba(90,37,44,0.3)]"
+          style={{
+            background:
+              "linear-gradient(to right, var(--burgundy-dark), var(--burgundy), var(--burgundy-dark))",
+          }}
+        >
+          {/* Ribbon bookmark */}
+          <div
+            className="absolute left-1/2 -translate-x-1/2 -top-1 w-[4px] md:w-[5px] h-[18px] md:h-[24px] rounded-b-[1px]"
+            style={{
+              backgroundColor: "var(--burgundy-light)",
+              boxShadow: "0 2px 4px rgba(90,37,44,0.2)",
+            }}
+          >
+            {/* Ribbon tail (V-notch) */}
+            <div
+              className="absolute bottom-0 left-0 w-full h-[5px] md:h-[7px]"
+              style={{
+                clipPath: "polygon(0 0, 50% 100%, 100% 0)",
+                backgroundColor: "var(--burgundy-light)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Right cover + static base page */}
+        <div className="absolute right-0 top-0 w-[calc(50%-3px)] md:w-[calc(50%-4px)] h-full rounded-r-[4px] overflow-hidden bg-[var(--burgundy)] shadow-[inset_2px_0_6px_rgba(0,0,0,0.2)]">
+          <div
+            className="absolute inset-[3px] md:inset-[4px] rounded-r-[3px]"
+            style={{ backgroundColor: pages[3].tint }}
+          >
+            <PageLines lines={pages[3].front} align="left" />
+            {/* Gutter shadow near spine */}
+            <div
+              className="absolute left-0 top-0 h-full w-[15%]"
+              style={{
+                background:
+                  "linear-gradient(to right, rgba(90,37,44,0.1), transparent)",
+              }}
+            />
+          </div>
+          {/* Page edge thickness — right side */}
+          <div
+            className="absolute right-0 top-[4px] md:top-[5px] w-[3px] md:w-[4px] rounded-r-[2px]"
+            style={{
+              height: "calc(100% - 8px)",
+              background:
+                "repeating-linear-gradient(to bottom, var(--cream) 0px, var(--cream) 2px, var(--cream-dark) 2px, var(--cream-dark) 3px)",
+            }}
+          />
+        </div>
+
+        {/* Flipping pages — hinged at spine, flip right → left */}
+        {pages.map((page, i) => (
+          <div
+            key={i}
+            className="absolute top-[2px] h-[calc(100%-4px)]"
+            style={{
+              left: "calc(50% + 3px)",
+              width: "calc(50% - 6px)",
+              transformOrigin: "left center",
+              transformStyle: "preserve-3d",
+              animation: `page-flip-${i} 12s ease-in-out infinite`,
+              animationDelay: "1.5s",
+              zIndex: 10 + pages.length - i,
+              willChange: "transform, filter",
+            }}
+          >
+            {/* Front face (right-side page) */}
+            <div
+              className="absolute inset-0 rounded-r-[3px]"
+              style={{
+                backfaceVisibility: "hidden",
+                backgroundColor: page.tint,
+              }}
+            >
+              <PageLines lines={page.front} align="left" />
+              {/* Gutter shadow on front face */}
+              <div
+                className="absolute left-0 top-0 h-full w-[12%]"
+                style={{
+                  background:
+                    "linear-gradient(to right, rgba(90,37,44,0.08), transparent)",
+                }}
+              />
+            </div>
+            {/* Back face (left-side page when flipped) */}
+            <div
+              className="absolute inset-0 rounded-l-[3px]"
+              style={{
+                backfaceVisibility: "hidden",
+                transform: "rotateY(180deg)",
+                backgroundColor: page.backTint,
+              }}
+            >
+              <PageLines lines={page.back} align="right" />
+              {/* Gutter shadow on back face */}
+              <div
+                className="absolute right-0 top-0 h-full w-[12%]"
+                style={{
+                  background:
+                    "linear-gradient(to left, rgba(90,37,44,0.08), transparent)",
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
   );
 }
 
 export default function Hero() {
   return (
     <section className="relative w-full overflow-hidden min-h-[480px] md:min-h-[591px]">
-      {/* Autumn leaves — blown by wind */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {leaves.map((leaf) => (
-          <LeafSVG
-            key={leaf.id}
-            shape={leaf.shape}
-            size={leaf.size}
-            color={leaf.color}
-            opacity={leaf.opacity}
-            className={layerClasses[leaf.layer]}
-            isForeground={leaf.layer === "fg"}
-            style={{
-              right: leaf.x,
-              top: leaf.y,
-              transform: `rotate(${leaf.rotate}deg)`,
-              animation: `${leaf.animation} ${leaf.duration} ${leaf.delay} ease-in-out infinite`,
-              willChange: "transform, opacity",
-            }}
-          />
-        ))}
-      </div>
+      {/* Open book with page-turning animation */}
+      <OpenBook />
 
       {/* Content with orchestrated entrance */}
       <div className="relative flex flex-col gap-6 md:gap-8 section-px pt-[60px] md:pt-[100px] pb-12 md:pb-0 h-full">
